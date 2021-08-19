@@ -5,7 +5,6 @@ module.exports = function registerHook({ env, exceptions }) {
     const { PERSONAL_ACCESS_TOKEN } = env
 
     const triggerAction = () => {
-        console.log('trigger_action')
         const headers = {
             'Content-Type': 'application/vnd.github.v3+json',
             Authorization: `token ${PERSONAL_ACCESS_TOKEN}`,
@@ -16,14 +15,11 @@ module.exports = function registerHook({ env, exceptions }) {
                 headers,
             })
         } catch (error) {
-            console.log(error)
             throw new ServiceUnavailableException(error)
         }
     }
 
     const setWebHook = async (input) => {
-        console.log('set webhook')
-        console.log(input)
         if (input.event === 'items.delete') {
             triggerAction()
         } else {
@@ -42,29 +38,25 @@ module.exports = function registerHook({ env, exceptions }) {
                 if (is_triggering_status) {
                     triggerAction()
                 }
-            } catch (err) {
-                console.log(err)
+            } catch (error) {
+                throw new ServiceUnavailableException(error)
             }
         }
-        console.log('result_input:')
-        console.log(input)
-        console.log('result_item:')
-        console.log(input.item)
     }
 
     return {
         'items.create': function (input) {
-            if (input.collection === 'blog' || 'videos') {
+            if (input.collection.match(/blog|videos/)) {
                 setWebHook(input)
             }
         },
         'items.update': function (input) {
-            if (input.collection === 'blog' || 'videos') {
+            if (input.collection.match(/blog|videos/)) {
                 setWebHook(input)
             }
         },
         'items.delete': function (input) {
-            if (input.collection === 'blog' || 'videos') {
+            if (input.collection.match(/blog|videos/)) {
                 setWebHook(input)
             }
         },
