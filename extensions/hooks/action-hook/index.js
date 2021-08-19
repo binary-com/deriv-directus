@@ -54,17 +54,17 @@ module.exports = function registerHook({ env, exceptions }) {
 
     return {
         'items.create': function (input) {
-            if ((input.collection === 'blog') | 'videos') {
+            if (input.collection === 'blog' || 'videos') {
                 setWebHook(input)
             }
         },
         'items.update': function (input) {
-            if ((input.collection === 'blog') | 'videos') {
+            if (input.collection === 'blog' || 'videos') {
                 setWebHook(input)
             }
         },
         'items.delete': function (input) {
-            if ((input.collection === 'blog') | 'videos') {
+            if (input.collection === 'blog' || 'videos') {
                 setWebHook(input)
             }
         },
