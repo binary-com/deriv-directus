@@ -7,15 +7,15 @@ module.exports = function registerHook({ env, exceptions }) {
     const triggerAction = async () => {
         const headers = {
             'Content-Type': 'application/vnd.github.v3+json',
-            Authorization: `bearer ${PERSONAL_ACCESS_TOKEN}`,
-        };
-        const body = { event_type: 'cms-hook' };
+            Authorization: `bearer ${PERSONAL_ACCESS_TOKEN}`
+        }
+        const body = { event_type: 'publish_blog' }
         try {
             await axios.post(
                 'https://api.github.com/repos/binary-com/deriv-com/dispatches',
                 body,
                 { headers }
-            );
+            )
         } catch (error) {
             throw new ServiceUnavailableException(error)
         }
@@ -26,22 +26,20 @@ module.exports = function registerHook({ env, exceptions }) {
             triggerAction()
         } else {
             try {
-                let is_triggering_status = false;
+                let is_triggering_status = false
                 await Promise.all(
                     input.item.map(async (single_item) => {
                         const blog_post = await input.database
                             .select('*')
                             .from(input.collection)
-                            .where({ id: single_item });
+                            .where({ id: single_item })
 
                         is_triggering_status =
-                        blog_post[0].status === 'published' ||
-                        blog_post[0].status === 'archived';
+                            blog_post[0].status === 'published' ||
+                            blog_post[0].status === 'archived'
                     })
-                );
+                )
 
-                console.log('is_triggering_status');
-                console.log(is_triggering_status);
                 if (is_triggering_status) {
                     triggerAction()
                 }
@@ -49,7 +47,7 @@ module.exports = function registerHook({ env, exceptions }) {
                 throw new ServiceUnavailableException(error)
             }
         }
-    };
+    }
 
     return {
         'items.create': function (input) {
@@ -66,6 +64,6 @@ module.exports = function registerHook({ env, exceptions }) {
             if (input.collection.match(/blog|videos/)) {
                 setWebHook(input)
             }
-        },
+        }
     }
 }
