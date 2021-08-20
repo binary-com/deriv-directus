@@ -4,11 +4,11 @@ module.exports = function registerHook({ env, exceptions }) {
     const { ServiceUnavailableException } = exceptions;
     const { PERSONAL_ACCESS_TOKEN } = env;
 
-    const triggerAction = () => {
-		console.log('trigger_action')
+    const triggerAction = async () => {
+        console.log('trigger_action');
         const headers = {
             'Content-Type': 'application/vnd.github.v3+json',
-            Authorization: `token ${PERSONAL_ACCESS_TOKEN}`,
+            Authorization: `bearer ${PERSONAL_ACCESS_TOKEN}`,
         };
         const body = { event_type: 'cms-hook' };
         try {
@@ -17,6 +17,7 @@ module.exports = function registerHook({ env, exceptions }) {
                 body,
                 { headers }
             );
+            console.log('axios done');
         } catch (error) {
             console.log(error);
             throw new ServiceUnavailableException(error);
@@ -24,24 +25,30 @@ module.exports = function registerHook({ env, exceptions }) {
     };
 
     const setWebHook = async (input) => {
-		console.log('set webhook')
-		console.log(input)
         if (input.event === 'items.delete') {
             triggerAction();
         } else {
             try {
                 let is_triggering_status = false;
-                input.item.forEach((single_item) => {
-                    const article = await input.database
-                        .select('*')
-                        .from(input.collection)
-                        .where({ article_id: single_item });
+                console.log('input item');
+                console.log(input.item);
+                await Promise.all(
+                    input.item.map(async (single_item) => {
+                        const article = await input.database
+                            .select('*')
+                            .from(input.collection)
+                            .where({ article_id: single_item });
 
-                    is_triggering_status =
-                        article[0].status === 'published' ||
-                        article[0].status === 'archived';
-                });
+                        console.log('article');
+                        console.log(article);
+                        is_triggering_status =
+                            article[0].status === 'published' ||
+                            article[0].status === 'archived';
+                    })
+                );
 
+                console.log('is_triggering_status');
+                console.log(is_triggering_status);
                 if (is_triggering_status) {
                     triggerAction();
                 }
@@ -49,10 +56,6 @@ module.exports = function registerHook({ env, exceptions }) {
                 console.log(err);
             }
         }
-        console.log('result_input:');
-        console.log(input);
-        console.log('result_item:');
-        console.log(input.item);
     };
 
     return {
