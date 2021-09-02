@@ -51,17 +51,17 @@ module.exports = function registerHook({ env, exceptions }) {
 
     return {
         'items.create': function (input) {
-            if (input.collection.match(/blog|videos/)) {
+            if (input.collection.match(/blog|videos|homepage_banners/)) {
                 setWebHook(input)
             }
         },
         'items.update': function (input) {
-            if (input.collection.match(/blog|videos/)) {
+            if (input.collection.match(/blog|videos|homepage_banners/)) {
                 setWebHook(input)
             }
         },
         'items.delete': function (input) {
-            if (input.collection.match(/blog|videos/)) {
+            if (input.collection.match(/blog|videos|homepage_banners/)) {
                 setWebHook(input)
             }
         }
